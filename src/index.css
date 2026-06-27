@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+
+:root {
+  /* Brand & Accent (Lovable Style) */
+  --bg-color: #f7f4ed; /* Cream background */
+  --surface-color: #f7f4ed;
+  
+  /* Neutral Scale */
+  --text-primary: #1c1c1c; /* Charcoal */
+  --text-secondary: #5f5f5d; /* Muted Gray */
+  --text-on-dark: #fcfbf8;
+  
+  /* Borders */
+  --border-light: #eceae4;
+  --border-interactive: rgba(28, 28, 28, 0.4);
+  
+  /* Spacing */
+  --spacing-xxs: 8px;
+  --spacing-xs: 12px;
+  --spacing-sm: 16px;
+  --spacing-md: 24px;
+  --spacing-lg: 32px;
+  --spacing-xl: 48px;
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-pill: 9999px;
+
+  /* Shadows */
+  --shadow-focus: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+
+  /* Typography */
+  --font-family: 'Nunito', -apple-system, system-ui, sans-serif;
+  --transition-speed: 0.2s;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background: var(--bg-color);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: var(--radius-pill);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-interactive);
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Lovable Specific Utilities */
+.btn-dark {
+  background: var(--text-primary);
+  color: var(--text-on-dark);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: rgba(255, 255, 255, 0.2) 0px 0.5px 0px 0px inset, rgba(0, 0, 0, 0.2) 0px 0px 0px 0.5px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+  transition: all var(--transition-speed);
+}
+
+.btn-dark:hover {
+  opacity: 0.8;
+}
+
+.btn-dark:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
