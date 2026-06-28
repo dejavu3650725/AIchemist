@@ -3,7 +3,7 @@
 :root {
   /* Brand & Accent (Lovable Style) */
   --bg-color: #f7f4ed; /* Cream background */
-  --surface-color: #f7f4ed;
+  --surface-color: #ffffff; /* White card surface */
   
   /* Neutral Scale */
   --text-primary: #1c1c1c; /* Charcoal */
