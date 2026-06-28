@@ -150,9 +150,10 @@ function AdminModal({ editingApp, onClose, onAdd, onEdit }) {
                 <textarea 
                   required 
                   rows="2"
+                  maxLength={100}
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  placeholder="이 앱은 어떤 앱인가요?"
+                  placeholder="이 앱은 어떤 앱인가요? (최대 100자)"
                 />
               </div>
 
