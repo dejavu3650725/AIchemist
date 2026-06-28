@@ -13,12 +13,14 @@ function AdminModal({ editingApp, onClose, onAdd, onEdit }) {
     description: editingApp.description,
     icon: editingApp.icon,
     url: editingApp.url,
+    category: editingApp.category || '학습지도',
     tags: editingApp.tags.join(', ')
   } : {
     title: '',
     description: '',
     icon: '',
     url: '',
+    category: '학습지도',
     tags: ''
   })
 
@@ -56,6 +58,7 @@ function AdminModal({ editingApp, onClose, onAdd, onEdit }) {
         description: formData.description,
         icon: formData.icon || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=200&q=80',
         url: formData.url,
+        category: formData.category,
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean)
       }
       onEdit(updatedApp)
@@ -66,6 +69,7 @@ function AdminModal({ editingApp, onClose, onAdd, onEdit }) {
         description: formData.description,
         icon: formData.icon || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=200&q=80',
         url: formData.url,
+        category: formData.category,
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean)
       }
       onAdd(newApp)
@@ -121,6 +125,24 @@ function AdminModal({ editingApp, onClose, onAdd, onEdit }) {
                   onChange={(e) => setFormData({...formData, url: e.target.value})}
                   placeholder="https://..."
                 />
+              </div>
+
+              <div className="form-group">
+                <label>카테고리</label>
+                <select 
+                  value={formData.category}
+                  onChange={(e) => setFormData({...formData, category: e.target.value})}
+                  required
+                >
+                  <option value="학습지도">학습지도</option>
+                  <option value="생활지도">생활지도</option>
+                  <option value="에듀테크">에듀테크</option>
+                  <option value="로봇">로봇</option>
+                  <option value="수업&평가">수업&평가</option>
+                  <option value="커뮤니티">커뮤니티</option>
+                  <option value="교육과정 매핑">교육과정 매핑</option>
+                  <option value="개발자 매뉴얼">개발자 매뉴얼</option>
+                </select>
               </div>
 
               <div className="form-group">
