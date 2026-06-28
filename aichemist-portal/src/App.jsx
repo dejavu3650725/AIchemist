@@ -12,6 +12,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('전체 보기')
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false)
+  const [editingApp, setEditingApp] = useState(null)
   const [activePolicy, setActivePolicy] = useState(null) // 'terms' | 'privacy' | null
 
   const GNB_MENU = [
@@ -67,6 +68,22 @@ function App() {
     localStorage.setItem('aichemist_apps', JSON.stringify(updatedApps))
   }
 
+  const handleEditApp = (updatedApp) => {
+    const updatedApps = apps.map(app => app.appId === updatedApp.appId ? updatedApp : app)
+    setApps(updatedApps)
+    localStorage.setItem('aichemist_apps', JSON.stringify(updatedApps))
+  }
+
+  const openAddModal = () => {
+    setEditingApp(null)
+    setIsAdminModalOpen(true)
+  }
+
+  const openEditModal = (app) => {
+    setEditingApp(app)
+    setIsAdminModalOpen(true)
+  }
+
   const handleDeleteApp = (appId) => {
     const updatedApps = apps.filter(app => app.appId !== appId)
     setApps(updatedApps)
@@ -78,7 +95,7 @@ function App() {
       <Header 
         searchQuery={searchQuery} 
         setSearchQuery={setSearchQuery} 
-        onOpenAdmin={() => setIsAdminModalOpen(true)} 
+        onOpenAdmin={openAddModal} 
       />
       
       <main className="portal-main">
@@ -114,14 +131,16 @@ function App() {
         </aside>
 
         <section className="portal-content">
-          <AppGrid apps={filteredApps} onDeleteApp={handleDeleteApp} />
+          <AppGrid apps={filteredApps} onEditApp={openEditModal} onDeleteApp={handleDeleteApp} />
         </section>
       </main>
 
       {isAdminModalOpen && (
         <AdminModal 
+          editingApp={editingApp}
           onClose={() => setIsAdminModalOpen(false)} 
           onAdd={handleAddApp} 
+          onEdit={handleEditApp}
         />
       )}
 

@@ -1,19 +1,35 @@
 import React, { useState } from 'react'
 import './AdminModal.css'
 
-function AdminModal({ onClose, onAdd }) {
+function AdminModal({ editingApp, onClose, onAdd, onEdit }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(editingApp ? {
+    title: editingApp.title,
+    description: editingApp.description,
+    icon: editingApp.icon,
+    url: editingApp.url,
+    tags: editingApp.tags.join(', ')
+  } : {
     title: '',
     description: '',
     icon: '',
     url: '',
-    category: '어학',
     tags: ''
   })
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setFormData({ ...formData, icon: reader.result })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   const handleLogin = (e) => {
     e.preventDefault()
@@ -22,24 +38,35 @@ function AdminModal({ onClose, onAdd }) {
       setIsAuthenticated(true)
       setError('')
     } else {
-      setError('비밀번호가 틀렸당께요!')
+      setError('비밀번호가 틀렸습니다.')
     }
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
     
-    const newApp = {
-      appId: `app-${Date.now()}`,
-      title: formData.title,
-      description: formData.description,
-      icon: formData.icon || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=200&q=80',
-      url: formData.url,
-      category: formData.category,
-      tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean)
+    if (editingApp) {
+      const updatedApp = {
+        ...editingApp,
+        title: formData.title,
+        description: formData.description,
+        icon: formData.icon || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=200&q=80',
+        url: formData.url,
+        tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean)
+      }
+      onEdit(updatedApp)
+    } else {
+      const newApp = {
+        appId: `app-${Date.now()}`,
+        title: formData.title,
+        description: formData.description,
+        icon: formData.icon || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=200&q=80',
+        url: formData.url,
+        tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean)
+      }
+      onAdd(newApp)
     }
 
-    onAdd(newApp)
     onClose()
   }
 
@@ -51,7 +78,7 @@ function AdminModal({ onClose, onAdd }) {
         {!isAuthenticated ? (
           <div className="admin-login">
             <h2>🔒 관리자 인증</h2>
-            <p>앱을 등록하려면 코드를 입력하쇼!</p>
+            <p>앱을 등록하려면 코드를 입력하세요.</p>
             <form onSubmit={handleLogin}>
               <input 
                 type="password" 
@@ -66,21 +93,8 @@ function AdminModal({ onClose, onAdd }) {
           </div>
         ) : (
           <div className="admin-form">
-            <h2>✨ 새 학습 앱 등록</h2>
+            <h2>{editingApp ? "✨ 앱 정보 수정" : "✨ 새 앱 등록"}</h2>
             <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label>카테고리</label>
-                <select 
-                  value={formData.category} 
-                  onChange={(e) => setFormData({...formData, category: e.target.value})}
-                >
-                  <option value="어학">어학</option>
-                  <option value="수학">수학</option>
-                  <option value="과학">과학</option>
-                  <option value="프로그래밍">프로그래밍</option>
-                  <option value="생산성">생산성</option>
-                </select>
-              </div>
 
               <div className="form-group">
                 <label>앱 이름 (Title)</label>
@@ -126,16 +140,24 @@ function AdminModal({ onClose, onAdd }) {
               </div>
 
               <div className="form-group">
-                <label>썸네일 이미지 URL (선택)</label>
+                <label>썸네일 이미지 (선택)</label>
                 <input 
-                  type="url" 
-                  value={formData.icon}
-                  onChange={(e) => setFormData({...formData, icon: e.target.value})}
-                  placeholder="이미지 주소가 없으면 기본 이미지가 들어갑니다."
+                  type="file" 
+                  accept="image/*"
+                  onChange={handleImageUpload}
                 />
+                {formData.icon && (
+                  <img 
+                    src={formData.icon} 
+                    alt="미리보기" 
+                    style={{ marginTop: '10px', maxWidth: '100%', height: '100px', objectFit: 'cover', borderRadius: '8px' }} 
+                  />
+                )}
               </div>
 
-              <button type="submit" className="btn-dark">등록하기 🚀</button>
+              <button type="submit" className="btn-dark">
+                {editingApp ? "수정하기 🚀" : "등록하기 🚀"}
+              </button>
             </form>
           </div>
         )}
