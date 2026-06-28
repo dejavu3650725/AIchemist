@@ -1,17 +1,27 @@
 import React from 'react'
 import './AppGrid.css'
 
-function AppCard({ app, onDelete }) {
+function AppCard({ app, onEdit, onDelete }) {
   const handleDelete = (e) => {
     e.preventDefault(); // Prevent navigating to the app URL
     onDelete(app.appId);
   }
 
+  const handleEdit = (e) => {
+    e.preventDefault();
+    onEdit(app);
+  }
+
   return (
     <a href={app.url} target="_blank" rel="noopener noreferrer" className="app-card">
-      <button className="delete-btn" onClick={handleDelete} title="앱 삭제하기">
-        🗑️
-      </button>
+      <div className="card-actions">
+        <button className="action-btn edit-btn" onClick={handleEdit} title="앱 수정하기">
+          ✏️
+        </button>
+        <button className="action-btn delete-btn" onClick={handleDelete} title="앱 삭제하기">
+          🗑️
+        </button>
+      </div>
       <div className="app-card-img">
         <img src={app.icon} alt={app.title} />
       </div>
@@ -28,7 +38,7 @@ function AppCard({ app, onDelete }) {
   )
 }
 
-function AppGrid({ apps, onDeleteApp }) {
+function AppGrid({ apps, onEditApp, onDeleteApp }) {
   if (apps.length === 0) {
     return (
       <div className="empty-state">
@@ -40,7 +50,7 @@ function AppGrid({ apps, onDeleteApp }) {
   return (
     <div className="app-grid">
       {apps.map((app) => (
-        <AppCard key={app.appId} app={app} onDelete={onDeleteApp} />
+        <AppCard key={app.appId} app={app} onEdit={onEditApp} onDelete={onDeleteApp} />
       ))}
     </div>
   )

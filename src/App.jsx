@@ -3,6 +3,8 @@ import initialApps from './data/apps.json'
 import Header from './components/Header'
 import AppGrid from './components/AppGrid'
 import AdminModal from './components/AdminModal'
+import Footer from './components/Footer'
+import PolicyModal from './components/PolicyModal'
 import './App.css'
 
 function App() {
@@ -10,32 +12,34 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('전체 보기')
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false)
+  const [editingApp, setEditingApp] = useState(null)
+  const [activePolicy, setActivePolicy] = useState(null) // 'terms' | 'privacy' | null
 
   const GNB_MENU = [
     {
       id: 'workspace',
       title: '🧪 연구실 (Workspace)',
-      subMenus: ['새 수업 설계하기', '단계별 치트키', '최근 작업 내역']
+      subMenus: ['학습지도', '생활지도']
     },
     {
       id: 'library',
       title: '📖 마법서 (Library)',
-      subMenus: ['내 수업 보관함', '프로젝트 폴더 관리', '휴지통']
+      subMenus: ['에듀테크', '로봇']
     },
     {
       id: 'gallery',
       title: '💎 연금술 조합소 (Gallery)',
-      subMenus: ['우수 수업 레시피', '교사 커뮤니티', '프롬프트 팁']
+      subMenus: ['수업&평가', '커뮤니티']
     },
     {
       id: 'resources',
       title: '🧰 도구함 (Resources)',
-      subMenus: ['교과 성취기준 맵핑', '로봇/교구 매뉴얼', '블록 코딩 튜토리얼']
+      subMenus: ['교육과정 매핑', '개발자 매뉴얼']
     },
     {
       id: 'mypage',
       title: '⚙️ 설정 (My Page)',
-      subMenus: ['내 프로필', '구독/크레딧 관리', '문의하기']
+      subMenus: ['내 프로필', '문의하기']
     }
   ]
 
@@ -64,6 +68,22 @@ function App() {
     localStorage.setItem('aichemist_apps', JSON.stringify(updatedApps))
   }
 
+  const handleEditApp = (updatedApp) => {
+    const updatedApps = apps.map(app => app.appId === updatedApp.appId ? updatedApp : app)
+    setApps(updatedApps)
+    localStorage.setItem('aichemist_apps', JSON.stringify(updatedApps))
+  }
+
+  const openAddModal = () => {
+    setEditingApp(null)
+    setIsAdminModalOpen(true)
+  }
+
+  const openEditModal = (app) => {
+    setEditingApp(app)
+    setIsAdminModalOpen(true)
+  }
+
   const handleDeleteApp = (appId) => {
     const updatedApps = apps.filter(app => app.appId !== appId)
     setApps(updatedApps)
@@ -75,7 +95,7 @@ function App() {
       <Header 
         searchQuery={searchQuery} 
         setSearchQuery={setSearchQuery} 
-        onOpenAdmin={() => setIsAdminModalOpen(true)} 
+        onOpenAdmin={openAddModal} 
       />
       
       <main className="portal-main">
@@ -111,16 +131,27 @@ function App() {
         </aside>
 
         <section className="portal-content">
-          <AppGrid apps={filteredApps} onDeleteApp={handleDeleteApp} />
+          <AppGrid apps={filteredApps} onEditApp={openEditModal} onDeleteApp={handleDeleteApp} />
         </section>
       </main>
 
       {isAdminModalOpen && (
         <AdminModal 
+          editingApp={editingApp}
           onClose={() => setIsAdminModalOpen(false)} 
           onAdd={handleAddApp} 
+          onEdit={handleEditApp}
         />
       )}
+
+      {activePolicy && (
+        <PolicyModal 
+          type={activePolicy} 
+          onClose={() => setActivePolicy(null)} 
+        />
+      )}
+
+      <Footer onOpenPolicy={(type) => setActivePolicy(type)} />
     </div>
   )
 }

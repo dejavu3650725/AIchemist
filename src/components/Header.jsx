@@ -5,7 +5,7 @@ function Header({ searchQuery, setSearchQuery, onOpenAdmin }) {
   return (
     <header className="portal-header glass">
       <div className="header-logo">
-        <span className="logo-icon">🧪</span>
+        <span className="logo-icon">⚡</span>
         <h1>AIchemist</h1>
       </div>
       
