@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { collection, getDocs, setDoc, deleteDoc, doc } from 'firebase/firestore'
+import { db } from './firebase'
 import initialApps from './data/apps.json'
 import Header from './components/Header'
 import AppGrid from './components/AppGrid'
@@ -43,18 +45,38 @@ function App() {
     }
   ]
 
-  // Load apps from JSON or LocalStorage on mount
+  // Load apps from Firestore on mount
   useEffect(() => {
-    const savedApps = localStorage.getItem('aichemist_apps')
-    if (savedApps) {
-      setApps(JSON.parse(savedApps))
-    } else {
-      setApps(initialApps)
-      localStorage.setItem('aichemist_apps', JSON.stringify(initialApps))
+    const fetchApps = async () => {
+      try {
+        const appsCol = collection(db, 'apps')
+        const appSnapshot = await getDocs(appsCol)
+        
+        if (appSnapshot.empty) {
+          // 파이어베이스가 비어있으면 초기 데이터 밀어넣기 (Seeding)
+          for (const app of initialApps) {
+            await setDoc(doc(db, 'apps', app.appId), app)
+          }
+          setApps(initialApps)
+        } else {
+          // Firestore에서 불러오기
+          const appList = appSnapshot.docs.map(docSnap => ({ 
+            ...docSnap.data(), 
+            appId: docSnap.id 
+          }))
+          setApps(appList)
+        }
+      } catch (err) {
+        console.error("🔥 Firebase 로드 실패:", err)
+        // 에러 시 로컬 스토리지로 폴백
+        const savedApps = localStorage.getItem('aichemist_apps')
+        if (savedApps) setApps(JSON.parse(savedApps))
+        else setApps(initialApps)
+      }
     }
+    fetchApps()
   }, [])
 
-  // Filter logic
   const filteredApps = apps.filter(app => {
     const matchesCategory = selectedCategory === '전체 보기' || app.category === selectedCategory;
     const matchesSearch = app.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -62,16 +84,39 @@ function App() {
     return matchesCategory && matchesSearch;
   })
 
-  const handleAddApp = (newApp) => {
-    const updatedApps = [...apps, newApp]
-    setApps(updatedApps)
-    localStorage.setItem('aichemist_apps', JSON.stringify(updatedApps))
+  // Gemini 비서(Vercel 서버리스 함수) 호출용 뼈대 함수
+  const askGemini = async (promptText) => {
+    try {
+      const res = await fetch('/api/gemini-aichemist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: promptText })
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      return data.result
+    } catch (err) {
+      console.error('Gemini 호출 실패:', err)
+      return null
+    }
   }
 
-  const handleEditApp = (updatedApp) => {
-    const updatedApps = apps.map(app => app.appId === updatedApp.appId ? updatedApp : app)
-    setApps(updatedApps)
-    localStorage.setItem('aichemist_apps', JSON.stringify(updatedApps))
+  const handleAddApp = async (newApp) => {
+    try {
+      await setDoc(doc(db, 'apps', newApp.appId), newApp)
+      setApps([...apps, newApp])
+    } catch (err) {
+      console.error("앱 등록 실패:", err)
+    }
+  }
+
+  const handleEditApp = async (updatedApp) => {
+    try {
+      await setDoc(doc(db, 'apps', updatedApp.appId), updatedApp)
+      setApps(apps.map(app => app.appId === updatedApp.appId ? updatedApp : app))
+    } catch (err) {
+      console.error("앱 수정 실패:", err)
+    }
   }
 
   const openAddModal = () => {
@@ -84,10 +129,13 @@ function App() {
     setIsAdminModalOpen(true)
   }
 
-  const handleDeleteApp = (appId) => {
-    const updatedApps = apps.filter(app => app.appId !== appId)
-    setApps(updatedApps)
-    localStorage.setItem('aichemist_apps', JSON.stringify(updatedApps))
+  const handleDeleteApp = async (appId) => {
+    try {
+      await deleteDoc(doc(db, 'apps', appId))
+      setApps(apps.filter(app => app.appId !== appId))
+    } catch (err) {
+      console.error("앱 삭제 실패:", err)
+    }
   }
 
   return (
